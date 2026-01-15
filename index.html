@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>The Last Protocol</title>
+
+    <style>
+      /* Сброс стандартного вида */
+      progress {
+        -webkit-appearance: none;
+        appearance: none;
+        border: none;
+      }
+      /* Цвет фона */
+      progress::-webkit-progress-bar {
+        background-color: #94a3b8;
+      }
+      /* Цвет заполнения  */
+      progress::-webkit-progress-value {
+        background-color: #475569;
+      }
+    </style>
+  </head>
+
+  <body class="flex flex-col mx-auto bg-slate-200">
+    <header class="m-10 items-center justify-items-center">
+      <p>The Last Protocol</p>
+    </header>
+
+    <main class="grid grid-cols-5 gap-1">
+      <!-- button -->
+      <aside class="border-r flex flex-col items-center">
+        <div class="m-6 px-6 text-center w-full">
+          <p>findFile</p>
+          <progress
+            id="findProgress"
+            value="0"
+            max="100"
+            class="w-full h-12 mt-6 cursor-pointer"
+          ></progress>
+        </div>
+
+        <div class="m-6 text-center">
+          <p>fileCredits</p>
+          <span id="fileCredits" class="">0</span>
+        </div>
+
+        <div class="m-6 text-center">
+          <p>archivedFiles</p>
+          <span id="archivedFiles" class="">0</span>
+        </div>
+
+        <div class="m-6 text-center">
+          <p>dataRate</p>
+          <span id="dataRate">0</span>
+          <span id="dataRateSpeed">fileCredits/s</span>
+        </div>
+
+        <div class="m-6 text-center">
+          <p>dataGraph</p>
+        </div>
+      </aside>
+
+      <!-- file finder -->
+      <aside class="border-r flex flex-col items-center">
+        <div class="m-6 text-center w-full">
+          <p>foundFiles</p>
+          <div id="foundFiles" class="mx-6"></div>
+        </div>
+      </aside>
+
+      <!-- stats -->
+      <aside class="border-r flex flex-col items-center">
+        <div class="m-6 text-center">
+          <p>fileSize</p>
+          <span id="fileSize">0</span>
+          <span id="fileSizeUnit">b</span>
+        </div>
+
+        <div class="m-6 text-center">
+          <p>storageUsed</p>
+          <span id="storageUsed">0</span>
+          <span>/</span>
+          <span id="storageMax">0</span>
+          <span id="storageUnit">b</span>
+        </div>
+
+        <div class="m-6 text-center">
+          <p>internetSpeed</p>
+          <span id="internetSpeed">0</span>
+          <span id="internetUnit">b/s</span>
+        </div>
+
+        <div class="m-6 text-center">
+          <p>cpuLoad</p>
+          <span id="cpuLoad">0</span>
+          <span>%</span>
+        </div>
+
+        <div class="m-6 text-center">
+          <p>findFileTime</p>
+          <span id="findFileTime">0</span>
+        </div>
+
+        <div class="m-6 text-center">
+          <p>maxFoundFiles</p>
+          <span id="maxFoundFiles">0</span>
+        </div>
+      </aside>
+
+      <!-- upgrades -->
+      <aside class="flex flex-col border-r items-center">
+        <div class="m-6 text-center">
+          <button id="fileSizeUpgrade" class="border p-2">
+            fileSizeUpgrade
+          </button>
+          <p>fileSizeUpgradePrice</p>
+          <span id="fileSizeUpgradePrice"> </span>
+        </div>
+
+        <div class="m-6 text-center">
+          <button id="storageMaxUpgrade" class="border p-2">
+            storageMaxUpgrade
+          </button>
+          <p>storageMaxUpgradePrice</p>
+          <span id="storageMaxUpgradePrice"> </span>
+        </div>
+
+        <div class="m-6 text-center">
+          <button id="internetSpeedUpgrade" class="border p-2">
+            internetSpeedUpgrade
+          </button>
+          <p>internetSpeedUpgradePrice</p>
+          <span id="internetSpeedUpgradePrice"> </span>
+        </div>
+
+        <div class="m-6 text-center">
+          <button id="cpuLoadUpgrade" class="border p-2">cpuLoadUpgrade</button>
+          <p>cpuLoadUpgradePrice</p>
+          <span id="cpuLoadUpgradePrice"> </span>
+        </div>
+
+        <div class="m-6 text-center">
+          <button id="findFileTimeUpgrade" class="border p-2">
+            findFileTimeUpgrade
+          </button>
+          <p>findFileTimeUpgradePrice</p>
+          <span id="findFileTimeUpgradePrice"> </span>
+        </div>
+
+        <div class="m-6 text-center">
+          <button id="maxFoundFilesUpgrade" class="border p-2">
+            maxFoundFilesUpgrade
+          </button>
+          <p>maxFoundFilesUpgradePrice</p>
+          <span id="maxFoundFilesUpgradePrice"> </span>
+        </div>
+      </aside>
+
+      <aside class="flex flex-col items-center">
+        <div class="m-6"></div>
+        <p>idk smthng cool later</p>
+      </aside>
+    </main>
+
+    <footer class="m-10 items-center justify-items-center">
+      <p></p>
+    </footer>
+
+    <script src="engine.js"></script>
+  </body>
+</html>
