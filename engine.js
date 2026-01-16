@@ -9,17 +9,17 @@ let activeDownloads = 0;
 let passiveIncome = 0;
 let finding = false;
 
-//  static game values, adjust for balance
+// static game values, adjust for balance
 // start
-let fileSize = 1;
-let storageMax = 64;
-let internetSpeed = 1;
-let findFileTime = 1;
-let maxFoundFiles = 1;
+let fileSize = 10;
+let storageMax = 10240;
+let internetSpeed = 100;
+let findFileTime = 0.1;
+let maxFoundFiles = 10;
 
 // default prices
 let fileSizeUpgradePrice = 5;
-let storageMaxUpgradePrice = 10;
+let storageMaxUpgradePrice = 100;
 let internetSpeedUpgradePrice = 5;
 let cpuLoadUpgradePrice = 10;
 let findFileTimeUpgradePrice = 20;
@@ -35,8 +35,8 @@ let maxFoundFilesUpgradePriceIncrease = 1.1;
 
 // value increases
 let fileSizeUpgradeValueIncrease = 0.5; //plus
-let storageMaxUpgradeValueIncrease = 64; //plus
-let internetSpeedUpgradeValueIncrease = 0.5; //plus
+let storageMaxUpgradeValueIncrease = 1024; //plus
+let internetSpeedUpgradeValueIncrease = 1; //plus
 let cpuLoadUpgradeValueIncrease = 10; // minus
 let findFileTimeUpgradeValueIncrease = 0.01; // minus in sec
 let maxFoundFilesUpgradeValueIncrease = 1; //plus
@@ -130,7 +130,7 @@ const advancedUpgradesListElement = document.getElementById(
 const archivedFilesToNextUnlock = document.getElementById(
   "archivedFilesToNextUnlock"
 );
-
+const passiveIncomeElement = document.getElementById("passiveIncome");
 // update display start -----------------------------------------------------------------------------
 updateDisplay();
 function updateDisplay() {
@@ -231,6 +231,7 @@ function updateDisplay() {
   maxFoundFilesUpgradeValueIncreaseElement.innerText = `+${maxFoundFilesUpgradeValueIncrease.toFixed(
     0
   )} to Max files can found`;
+  passiveIncomeElement.innerText = passiveIncome.toFixed(2);
 }
 // updateDisplay end --------------------------------------------------------------------------------
 
@@ -239,12 +240,12 @@ clearStorageButton.onclick = () => {
   if (storageUsed === 0) return;
   if (
     confirm(
-      "Format drive? This will free up all storage space, but divides File credits and Total archived  files by 2"
+      "Format drive? This will free up all storage space, but divides File credits and Total archived files by 2"
     )
   ) {
     storageUsed = 0;
-    fileCredits /= 2;
-    archivedFiles /= 2;
+    fileCredits = +(fileCredits / 2).toFixed(2);
+    archivedFiles = +(archivedFiles / 2).toFixed(2);
     updateDisplay();
   }
 };
@@ -419,7 +420,7 @@ fileSizeUpgradeElement.onclick = () => {
   if (fileCredits >= fileSizeUpgradePrice) {
     fileCredits -= fileSizeUpgradePrice;
     fileSize = fileSize + fileSizeUpgradeValueIncrease;
-    fileSizeUpgradePrice = Math.floor(
+    fileSizeUpgradePrice = Math.ceil(
       fileSizeUpgradePrice * fileSizeUpgradePriceIncrease
     );
     cpuLoad++;
@@ -436,7 +437,7 @@ storageMaxUpgradeElement.onclick = () => {
   if (fileCredits >= storageMaxUpgradePrice) {
     fileCredits -= storageMaxUpgradePrice;
     storageMax = storageMax + storageMaxUpgradeValueIncrease;
-    storageMaxUpgradePrice = Math.floor(
+    storageMaxUpgradePrice = Math.ceil(
       storageMaxUpgradePrice * storageMaxUpgradePriceIncrease
     );
     cpuLoad++;
@@ -453,7 +454,7 @@ internetSpeedUpgradeElement.onclick = () => {
   if (fileCredits >= internetSpeedUpgradePrice) {
     fileCredits -= internetSpeedUpgradePrice;
     internetSpeed = internetSpeed + internetSpeedUpgradeValueIncrease;
-    internetSpeedUpgradePrice = Math.floor(
+    internetSpeedUpgradePrice = Math.ceil(
       internetSpeedUpgradePrice * internetSpeedUpgradePriceIncrease
     );
     cpuLoad++;
@@ -469,7 +470,7 @@ cpuLoadUpgradeElement.onclick = () => {
   if (fileCredits >= cpuLoadUpgradePrice) {
     fileCredits -= cpuLoadUpgradePrice;
     cpuLoad = cpuLoad - cpuLoadUpgradeValueIncrease; ///change
-    cpuLoadUpgradePrice = Math.floor(
+    cpuLoadUpgradePrice = Math.ceil(
       cpuLoadUpgradePrice * cpuLoadUpgradePriceIncrease
     );
     cpuLoad++;
@@ -486,7 +487,7 @@ findFileTimeUpgradeElement.onclick = () => {
   if (fileCredits >= findFileTimeUpgradePrice) {
     fileCredits -= findFileTimeUpgradePrice;
     findFileTime = findFileTime - findFileTimeUpgradeValueIncrease;
-    findFileTimeUpgradePrice = Math.floor(
+    findFileTimeUpgradePrice = Math.ceil(
       findFileTimeUpgradePrice * findFileTimeUpgradePriceIncrease
     );
     cpuLoad++;
@@ -502,7 +503,7 @@ maxFoundFilesUpgradeElement.onclick = () => {
   if (fileCredits >= maxFoundFilesUpgradePrice) {
     fileCredits -= maxFoundFilesUpgradePrice;
     maxFoundFiles = maxFoundFiles + maxFoundFilesUpgradeValueIncrease;
-    maxFoundFilesUpgradePrice = Math.floor(
+    maxFoundFilesUpgradePrice = Math.ceil(
       maxFoundFilesUpgradePrice * maxFoundFilesUpgradePriceIncrease
     );
     cpuLoad++;
