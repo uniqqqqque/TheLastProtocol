@@ -11,7 +11,7 @@ let finding = false;
 //  static game values, adjust for balance
 // start
 let fileSize = 1;
-let storageMax = 1024;
+let storageMax = 64;
 let internetSpeed = 1;
 let findFileTime = 1;
 let maxFoundFiles = 1;
@@ -33,9 +33,9 @@ let findFileTimeUpgradePriceIncrease = 1.1;
 let maxFoundFilesUpgradePriceIncrease = 1.1;
 
 // value increases
-let fileSizeUpgradeValueIncrease = 2;
+let fileSizeUpgradeValueIncrease = 1.2;
 let storageMaxUpgradeValueIncrease = 2;
-let internetSpeedUpgradeValueIncrease = 2;
+let internetSpeedUpgradeValueIncrease = 1.2;
 let cpuLoadUpgradeValueIncrease = 0.9; //decrease
 let findFileTimeUpgradeValueIncrease = 0.9; //decrease
 let maxFoundFilesUpgradeValueIncrease = 1; //plus
@@ -92,19 +92,23 @@ const findFileTimeElement = document.getElementById("findFileTime");
 const maxFoundFilesElement = document.getElementById("maxFoundFiles");
 const nowFoundFiles = document.getElementById("nowFoundFiles");
 
+// update display ------------------------------------------------------
+updateDisplay();
 function updateDisplay() {
   /// stats
   archivedFilesElement.innerText = archivedFiles;
   fileCreditsElement.innerText = fileCredits.toFixed(2);
   dataRateElement.innerText = dataRate.toFixed(2);
+
   /// variables
   fileSizeElement.innerText = fileSize.toFixed(2);
   storageUsedElement.innerText = storageUsed.toFixed(2);
   storageMaxElement.innerText = storageMax;
   internetSpeedElement.innerText = internetSpeed.toFixed(2);
-  cpuLoadElement.innerText = cpuLoad;
+  cpuLoadElement.innerText = cpuLoad.toFixed(2);
   findFileTimeElement.innerText = findFileTime.toFixed(2);
   maxFoundFilesElement.innerText = maxFoundFiles;
+
   /// upgrade prices
   fileSizeUpgradePriceElement.innerText = fileSizeUpgradePrice;
   storageMaxUpgradePriceElement.innerText = storageMaxUpgradePrice;
@@ -112,8 +116,10 @@ function updateDisplay() {
   cpuLoadUpgradePriceElement.innerText = cpuLoadUpgradePrice;
   findFileTimeUpgradePriceElement.innerText = findFileTimeUpgradePrice;
   maxFoundFilesUpgradePriceElement.innerText = maxFoundFilesUpgradePrice;
+
   // unique
   nowFoundFiles.innerText = foundFilesElement.childElementCount;
+
   // storageUsedProgressBar
   storageUsedProgressBar.max = storageMax;
   storageUsedProgressBar.value = storageUsed;
@@ -124,10 +130,41 @@ function updateDisplay() {
   )} %`;
   storageUsedProgressLabel.className =
     "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-bold text-white";
+
   // cpuLoadProgressBar
   cpuLoadProgressBar.max = 100;
   cpuLoadProgressBar.value = cpuLoad;
+
+  // upgrade green colors
+  fileSizeUpgradeElement.className =
+    "border p-2 " +
+    (fileCredits >= fileSizeUpgradePrice ? "bg-green-200" : "bg-slate-200");
+
+  storageMaxUpgradeElement.className =
+    "border p-2 " +
+    (fileCredits >= storageMaxUpgradePrice ? "bg-green-200" : "bg-slate-200");
+
+  internetSpeedUpgradeElement.className =
+    "border p-2 " +
+    (fileCredits >= internetSpeedUpgradePrice
+      ? "bg-green-200"
+      : "bg-slate-200");
+
+  cpuLoadUpgradeElement.className =
+    "border p-2 " +
+    (fileCredits >= cpuLoadUpgradePrice ? "bg-green-200" : "bg-slate-200");
+
+  findFileTimeUpgradeElement.className =
+    "border p-2 " +
+    (fileCredits >= findFileTimeUpgradePrice ? "bg-green-200" : "bg-slate-200");
+
+  maxFoundFilesUpgradeElement.className =
+    "border p-2 " +
+    (fileCredits >= maxFoundFilesUpgradePrice
+      ? "bg-green-200"
+      : "bg-slate-200");
 }
+
 /// dataRate calc
 setInterval(() => {
   dataRate = fileCreditsLastSecond;
