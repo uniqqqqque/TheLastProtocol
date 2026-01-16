@@ -11,11 +11,11 @@ let finding = false;
 
 // static game values, adjust for balance
 // start
-let fileSize = 10;
-let storageMax = 10240;
-let internetSpeed = 100;
-let findFileTime = 0.1;
-let maxFoundFiles = 10;
+let fileSize = 1;
+let storageMax = 1024;
+let internetSpeed = 1;
+let findFileTime = 1;
+let maxFoundFiles = 1;
 
 // default prices
 let fileSizeUpgradePrice = 5;
