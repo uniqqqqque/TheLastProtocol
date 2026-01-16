@@ -84,9 +84,11 @@
       <p class="text-xl">The Last Protocol</p>
     </header>
 
-    <main class="grid grid-cols-5 gap-1">
+    <main class="grid grid-cols-1 md:grid-cols-5 gap-1">
       <!-- button -->
-      <aside class="border-r flex flex-col items-center">
+      <aside
+        class="border-b md:border-b-0 md:border-r flex flex-col items-center"
+      >
         <div class="m-6 px-6 text-center w-full">
           <span>Find Epstein files in the Network</span>
           <span>&#8628;</span>
@@ -126,7 +128,9 @@
       </aside>
 
       <!-- file finder -->
-      <aside class="border-r flex flex-col items-center">
+      <aside
+        class="border-b md:border-b-0 md:border-r flex flex-col items-center"
+      >
         <div class="m-6 text-center w-full">
           <span>Epstein files found:</span>
           <span id="nowFoundFiles" class="font-bold">0</span>
@@ -137,7 +141,9 @@
       </aside>
 
       <!-- stats -->
-      <aside class="border-r flex flex-col items-center">
+      <aside
+        class="border-b md:border-b-0 md:border-r flex flex-col items-center"
+      >
         <div class="m-6 text-center">
           <p>Average file size:</p>
           <span id="fileSize" class="font-bold">0</span>
@@ -199,7 +205,9 @@
       </aside>
 
       <!-- upgrades -->
-      <aside class="flex flex-col border-r items-center">
+      <aside
+        class="flex flex-col border-b md:border-b-0 md:border-r items-center"
+      >
         <div class="m-6 text-center">
           <button id="fileSizeUpgrade" class="border p-2">
             <span id="fileSizeUpgradeValueIncrease"></span>
