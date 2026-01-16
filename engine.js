@@ -1,19 +1,22 @@
-// dynamic game variables
+// dynamic game values
 let archivedFiles = 0;
 let storageUsed = 0;
 let fileCredits = 0;
 let cpuLoad = 0;
 let dataRate = 0;
 let fileCreditsLastSecond = 0;
+let activeDownloads = 0;
 let finding = false;
-let downloading = false;
 
 //  static game values, adjust for balance
+// start
 let fileSize = 1;
 let storageMax = 1024;
 let internetSpeed = 1;
 let findFileTime = 1;
-let maxFoundFiles = 2;
+let maxFoundFiles = 1;
+
+// default prices
 let fileSizeUpgradePrice = 10;
 let storageMaxUpgradePrice = 10;
 let internetSpeedUpgradePrice = 10;
@@ -21,7 +24,23 @@ let cpuLoadUpgradePrice = 10;
 let findFileTimeUpgradePrice = 10;
 let maxFoundFilesUpgradePrice = 10;
 
-/// consts
+// price increases
+let fileSizeUpgradePriceIncrease = 1.1;
+let storageMaxUpgradePriceIncrease = 1.1;
+let internetSpeedUpgradePriceIncrease = 1.1;
+let cpuLoadUpgradePriceIncrease = 1.1;
+let findFileTimeUpgradePriceIncrease = 1.1;
+let maxFoundFilesUpgradePriceIncrease = 1.1;
+
+// value increases
+let fileSizeUpgradeValueIncrease = 2;
+let storageMaxUpgradeValueIncrease = 2;
+let internetSpeedUpgradeValueIncrease = 2;
+let cpuLoadUpgradeValueIncrease = 0.9; //decrease
+let findFileTimeUpgradeValueIncrease = 0.9; //decrease
+let maxFoundFilesUpgradeValueIncrease = 1; //plus
+
+// consts for dom cache
 const findProgressElement = document.getElementById("findProgress");
 const fileSizeUpgradeElement = document.getElementById("fileSizeUpgrade");
 const fileSizeUpgradePriceElement = document.getElementById(
@@ -59,12 +78,19 @@ const fileSizeElement = document.getElementById("fileSize");
 const archivedFilesElement = document.getElementById("archivedFiles");
 const storageUsedElement = document.getElementById("storageUsed");
 const storageMaxElement = document.getElementById("storageMax");
+const storageUsedProgressBar = document.getElementById(
+  "storageUsedProgressBar"
+);
+const storageUsedProgressLabel = document.getElementById(
+  "storageUsedProgressLabel"
+);
 const internetSpeedElement = document.getElementById("internetSpeed");
 const cpuLoadElement = document.getElementById("cpuLoad");
 const dataRateElement = document.getElementById("dataRate");
 const fileCreditsElement = document.getElementById("fileCredits");
 const findFileTimeElement = document.getElementById("findFileTime");
 const maxFoundFilesElement = document.getElementById("maxFoundFiles");
+const nowFoundFiles = document.getElementById("nowFoundFiles");
 
 function updateDisplay() {
   /// stats
@@ -86,6 +112,21 @@ function updateDisplay() {
   cpuLoadUpgradePriceElement.innerText = cpuLoadUpgradePrice;
   findFileTimeUpgradePriceElement.innerText = findFileTimeUpgradePrice;
   maxFoundFilesUpgradePriceElement.innerText = maxFoundFilesUpgradePrice;
+  // unique
+  nowFoundFiles.innerText = foundFilesElement.childElementCount;
+  // storageUsedProgressBar
+  storageUsedProgressBar.max = storageMax;
+  storageUsedProgressBar.value = storageUsed;
+  const storageUsedProgressLabelPercent =
+    storageMax === 0 ? 0 : (storageUsed / storageMax) * 100;
+  storageUsedProgressLabel.innerText = `${storageUsedProgressLabelPercent.toFixed(
+    1
+  )} %`;
+  storageUsedProgressLabel.className =
+    "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-bold text-white";
+  // cpuLoadProgressBar
+  cpuLoadProgressBar.max = 100;
+  cpuLoadProgressBar.value = cpuLoad;
 }
 /// dataRate calc
 setInterval(() => {
@@ -94,14 +135,27 @@ setInterval(() => {
   updateDisplay();
 }, 1000);
 
-/// findFile
+/// array for downloads
+let activeDownloadsList = [];
+
+// for smooth finding with mouse
+let isMouseOverFind = false;
+findProgressElement.addEventListener(
+  "mouseenter",
+  () => (isMouseOverFind = true)
+);
+findProgressElement.addEventListener(
+  "mouseleave",
+  () => (isMouseOverFind = false)
+);
+
+/// findFile, first bar
 findProgressElement.onmouseover = () => {
   if (finding) return;
   if (foundFilesElement.childElementCount >= maxFoundFiles) {
     return;
   }
   finding = true;
-
   findProgressElement.style.pointerEvents = "none";
   findProgressElement.value = 0;
 
@@ -114,75 +168,153 @@ findProgressElement.onmouseover = () => {
     findProgressElement.value = percent;
   }, 10);
 
+  // download progress bar
   setTimeout(() => {
     clearInterval(findInterval);
+    const randomFactor = 1 + (Math.random() * 1.0 - 0.5); // +-10%
+    const thisFileSize = fileSize * randomFactor;
     const downloadBar = document.createElement("progress");
     downloadBar.value = 0;
     downloadBar.max = 100;
-    downloadBar.className = "w-full mt-6 h-12 cursor-pointer";
-    foundFilesElement.appendChild(downloadBar);
+    downloadBar.className = "w-full h-12 cursor-pointer";
 
+    // file size label
+    const fileSizeLabel = document.createElement("span");
+    fileSizeLabel.innerHTML = `${thisFileSize.toFixed(2)} b`;
+    fileSizeLabel.className =
+      "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-bold text-white";
+    const downloadContainer = document.createElement("div");
+    downloadContainer.className = "relative flex mt-6 h-6 items-center w-full";
+    downloadContainer.appendChild(downloadBar);
+    downloadContainer.appendChild(fileSizeLabel);
+    foundFilesElement.appendChild(downloadContainer);
+    updateDisplay();
     finding = false;
     findProgressElement.style.pointerEvents = "auto";
-
     findProgressElement.value = 0;
 
+    if (isMouseOverFind) {
+      findProgressElement.onmouseover();
+    }
+
+    // second bar
     downloadBar.onmouseover = () => {
-      if (downloading) return;
-      downloading = true;
+      if (storageUsed + thisFileSize > storageMax) {
+        alert("Not enough free space!");
+        return;
+      }
       downloadBar.style.pointerEvents = "none";
 
-      const downloadTime = (fileSize / internetSpeed) * 1000;
-      const downloadStartTime = Date.now();
+      const download = {
+        bar: downloadBar,
+        fileSize: thisFileSize,
+        downloaded: 0,
+        startTime: Date.now(),
+        lastUpdate: Date.now(),
+        interval: null,
+        finished: false,
+      };
 
-      const downloadInterval = setInterval(() => {
-        const elapsed = Date.now() - downloadStartTime;
-        const percent = Math.min((elapsed / downloadTime) * 100, 100);
-        downloadBar.value = percent;
-      }, 10);
+      activeDownloadsList.push(download);
+      recalcDownloads();
+      updateDisplay();
 
-      setTimeout(() => {
-        clearInterval(downloadInterval);
+      function updateDownload() {
+        if (download.finished) return;
+        const now = Date.now();
+        const delta = (now - download.lastUpdate) / 1000; //in sec
+        download.lastUpdate = now;
+        //speed
+        const speed = internetSpeed / activeDownloadsList.length;
+        download.downloaded += speed * delta;
+        let percent = Math.min(
+          (download.downloaded / download.fileSize) * 100,
+          100
+        );
+        download.bar.value = percent;
+        if (download.downloaded >= download.fileSize) {
+          finishDownload(download);
+        }
+      }
 
+      download.interval = setInterval(updateDownload, 10);
+
+      // finish download
+      function finishDownload(download) {
+        if (download.finished) return;
+        clearInterval(download.interval);
+        download.finished = true;
         archivedFiles++;
-        fileCreditsLastSecond += fileSize;
-        fileCredits += fileSize;
-        storageUsed += fileSize;
-        downloading = false;
-        downloadBar.remove();
-
+        fileCreditsLastSecond += download.fileSize;
+        fileCredits += download.fileSize;
+        storageUsed += download.fileSize;
+        downloadContainer.remove();
+        activeDownloadsList = activeDownloadsList.filter((d) => d !== download);
+        recalcDownloads();
         updateDisplay();
-      }, downloadTime);
+
+        if (isMouseOverFind) {
+          findProgressElement.onmouseover();
+        }
+      }
+
+      // recalc  downloads
+      function recalcDownloads() {
+        activeDownloads = activeDownloadsList.length;
+        const now = Date.now();
+        activeDownloadsList.forEach((d) => (d.lastUpdate = now));
+      }
     };
-  }, findDuration);
+  }, findFileTime * 1000);
 };
 
-/// fileSize upgrade
+/// fileSize upgrade ----------------------------------------------------------
 fileSizeUpgradeElement.onclick = () => {
+  if (cpuLoad >= 100) {
+    alert("Not enough cpu power!");
+    return;
+  }
   if (fileCredits >= fileSizeUpgradePrice) {
     fileCredits -= fileSizeUpgradePrice;
-    fileSize = fileSize * 2;
-    fileSizeUpgradePrice = Math.floor(fileSizeUpgradePrice * 1.1);
+    fileSize = fileSize * fileSizeUpgradeValueIncrease;
+    fileSizeUpgradePrice = Math.floor(
+      fileSizeUpgradePrice * fileSizeUpgradePriceIncrease
+    );
+    cpuLoad++;
     updateDisplay();
   }
 };
 
 /// storageMax upgrade
 storageMaxUpgradeElement.onclick = () => {
+  if (cpuLoad >= 100) {
+    alert("Not enough cpu power!");
+    return;
+  }
   if (fileCredits >= storageMaxUpgradePrice) {
     fileCredits -= storageMaxUpgradePrice;
-    storageMax = storageMax * 2;
-    storageMaxUpgradePrice = Math.floor(storageMaxUpgradePrice * 1.1);
+    storageMax = storageMax * storageMaxUpgradeValueIncrease;
+    storageMaxUpgradePrice = Math.floor(
+      storageMaxUpgradePrice * storageMaxUpgradePriceIncrease
+    );
+    cpuLoad++;
     updateDisplay();
   }
 };
 
 /// internetSpeed upgrade
 internetSpeedUpgradeElement.onclick = () => {
+  if (cpuLoad >= 100) {
+    alert("Not enough cpu power!");
+    return;
+  }
   if (fileCredits >= internetSpeedUpgradePrice) {
     fileCredits -= internetSpeedUpgradePrice;
-    internetSpeed = internetSpeed * 2;
-    internetSpeedUpgradePrice = Math.floor(internetSpeedUpgradePrice * 1.1);
+    internetSpeed = internetSpeed * internetSpeedUpgradeValueIncrease;
+    internetSpeedUpgradePrice = Math.floor(
+      internetSpeedUpgradePrice * internetSpeedUpgradePriceIncrease
+    );
+    cpuLoad++;
     updateDisplay();
   }
 };
@@ -191,29 +323,44 @@ internetSpeedUpgradeElement.onclick = () => {
 cpuLoadUpgradeElement.onclick = () => {
   if (fileCredits >= cpuLoadUpgradePrice) {
     fileCredits -= cpuLoadUpgradePrice;
-    cpuLoad = cpuLoad * 2; ///change
-    cpuLoadUpgradePrice = Math.floor(cpuLoadUpgradePrice * 1.1); ///change
+    cpuLoad = cpuLoad * cpuLoadUpgradeValueIncrease; ///change
+    cpuLoadUpgradePrice = Math.floor(
+      cpuLoadUpgradePrice * cpuLoadUpgradePriceIncrease
+    );
+    cpuLoad++;
     updateDisplay();
   }
 };
 
 /// findFileTime upgrade
 findFileTimeUpgradeElement.onclick = () => {
+  if (cpuLoad >= 100) {
+    alert("Not enough cpu power!");
+    return;
+  }
   if (fileCredits >= findFileTimeUpgradePrice) {
     fileCredits -= findFileTimeUpgradePrice;
-    findFileTime = findFileTime * 0.9;
-    findFileTimeUpgradePrice = Math.floor(findFileTimeUpgradePrice * 1.1);
+    findFileTime = findFileTime * findFileTimeUpgradeValueIncrease;
+    findFileTimeUpgradePrice = Math.floor(
+      findFileTimeUpgradePrice * findFileTimeUpgradePriceIncrease
+    );
+    cpuLoad++;
     updateDisplay();
   }
 };
 
 /// maxFoundFiles upgrade
 maxFoundFilesUpgradeElement.onclick = () => {
+  if (cpuLoad >= 100) {
+    return;
+  }
   if (fileCredits >= maxFoundFilesUpgradePrice) {
     fileCredits -= maxFoundFilesUpgradePrice;
-    maxFoundFiles = maxFoundFiles + 1;
-    maxFoundFilesUpgradePrice = Math.floor(maxFoundFilesUpgradePrice * 1.1);
+    maxFoundFiles = maxFoundFiles + maxFoundFilesUpgradeValueIncrease;
+    maxFoundFilesUpgradePrice = Math.floor(
+      maxFoundFilesUpgradePrice * maxFoundFilesUpgradePriceIncrease
+    );
+    cpuLoad++;
     updateDisplay();
   }
 };
-updateDisplay();
