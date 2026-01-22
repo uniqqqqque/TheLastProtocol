@@ -1,3 +1,5 @@
+// Advanced upgrades data (globals, no build step)
+
 const advancedUpgradesConfig = [
   // --- Early Game (Accessible starting from 15-20 archived files) ---
   {
