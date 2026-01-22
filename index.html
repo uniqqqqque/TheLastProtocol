@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link
+      href="https://fonts.googleapis.com/css?family=Inter:400,700&display=swap"
+      rel="stylesheet"
+    />
+    <title>The Last File</title>
+    <!-- for progress bars -->
+    <style>
+      /* font */
+      html,
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      /* reset default */
+      progress {
+        -webkit-appearance: none;
+        appearance: none;
+        border: none;
+      }
+
+      /*  find */
+      #findProgress::-webkit-progress-bar {
+        background-color: #94a3b8;
+      }
+      #findProgress::-webkit-progress-value {
+        background-color: #475569;
+      }
+
+      /* storage */
+      #storageUsedProgressBar::-webkit-progress-bar {
+        background-color: #94a3b8;
+      }
+      #storageUsedProgressBar::-webkit-progress-value {
+        background-color: #475569;
+      }
+
+      /* cpu */
+      #cpuLoadProgressBar::-webkit-progress-bar {
+        background-color: #94a3b8;
+      }
+      #cpuLoadProgressBar::-webkit-progress-value {
+        background-color: #475569;
+      }
+      #cpuLoadProgressBar::-webkit-progress-value {
+        background-color: #475569;
+      }
+
+      /* basic */
+      .download-progress::-webkit-progress-bar {
+        background-color: #94a3b8; /* slate-400 */
+      }
+      .download-progress::-webkit-progress-value {
+        background-color: #475569; /* slate-600 */
+        transition: width 0.1s linear;
+      }
+
+      /* rare */
+      .download-progress.rare::-webkit-progress-value {
+        background-color: #3b82f6; /* blue-500 */
+        box-shadow: 0 0 5px #3b82f6;
+      }
+
+      /* epic */
+      .download-progress.epic::-webkit-progress-value {
+        background-color: #a855f7; /* purple-500 */
+        box-shadow: 0 0 8px #a855f7;
+      }
+
+      /* legendary */
+      .download-progress.legendary::-webkit-progress-value {
+        background-color: #eab308; /* yellow-500 */
+        box-shadow: 0 0 10px #eab308;
+      }
+    </style>
+  </head>
+
+  <body class="flex flex-col mx-auto bg-slate-200">
+    <header class="m-10 items-center justify-items-center">
+      <p class="text-xl">The Last File</p>
+    </header>
+
+    <main class="grid grid-cols-1 md:grid-cols-5 gap-1">
+      <!-- button -->
+      <aside
+        class="border-b md:border-b-0 md:border-r flex flex-col items-center"
+      >
+        <div class="m-6 px-6 text-center w-full">
+          <span>Find Epstein files in the Network</span>
+          <span>&#8628;</span>
+          <progress
+            id="findProgress"
+            value="0"
+            max="100"
+            class="w-full h-12 mt-6 cursor-pointer"
+          ></progress>
+        </div>
+
+        <div class="m-6 text-center">
+          <p>File credits:</p>
+          <span id="fileCredits" class="font-bold">0</span>
+        </div>
+
+        <div class="m-6 text-center">
+          <p>Archived Epstein files:</p>
+          <span id="archivedFiles" class="font-bold">0</span>
+        </div>
+
+        <div class="m-6 text-center">
+          <p>Lifetime archived Epstein files:</p>
+          <span id="lifetimeArchivedFiles" class="font-bold">0</span>
+        </div>
+
+        <div class="m-6 text-center">
+          <p>Passive income per second:</p>
+          <span id="passiveIncome" class="font-bold">0</span>
+          <span>fileCredits/s</span>
+        </div>
+
+        <div class="m-6 text-center">
+          <p>File Credits per second:</p>
+          <span id="dataRate" class="font-bold">0</span>
+          <span id="dataRateSpeed">fileCredits/s</span>
+        </div>
+
+        <div class="m-6 text-center">
+          <button id="prestigeButton" class="border p-2">
+            <span id="prestigeButtonLabel">Stuck? Prestige!</span>
+          </button>
+          <br />
+          <span>Requires <span class="font-bold">100</span> found files</span>
+        </div>
+
+        <div class="m-6 text-center">
+          <p></p>
+        </div>
+      </aside>
+
+      <!-- file finder -->
+      <aside
+        class="border-b md:border-b-0 md:border-r flex flex-col items-center"
+      >
+        <div class="m-6 text-center w-full">
+          <span>Epstein files found:</span>
+          <span id="nowFoundFiles" class="font-bold">0</span>
+          <span class="font-bold">/</span>
+          <span id="maxFoundFiles" class="font-bold">1</span>
+          <div id="foundFiles" class="mx-6 mt-9"></div>
+        </div>
+      </aside>
+
+      <!-- stats -->
+      <aside
+        class="border-b md:border-b-0 md:border-r flex flex-col items-center"
+      >
+        <div class="m-6 text-center">
+          <p>Average file size:</p>
+          <span id="fileSize" class="font-bold">0</span>
+          <span id="fileSizeUnit" class="font-bold">b</span>
+        </div>
+
+        <div class="m-6 px-6 text-center w-full">
+          <p>Storage used:</p>
+          <span id="storageUsed" class="font-bold">0</span>
+          <span class="font-bold">/</span>
+          <span id="storageMax" class="font-bold">0</span>
+          <span id="storageUnit" class="font-bold">b</span>
+
+          <div class="flex justify-center">
+            <button
+              id="clearStorageButton"
+              class="border p-2 mt-4 h-8 flex justify-center items-center hover:bg-red-200"
+            >
+              Clear Storage
+            </button>
+          </div>
+
+          <div class="relative w-full h-12 mt-6">
+            <progress
+              id="storageUsedProgressBar"
+              value="0"
+              max="100"
+              class="w-full h-12 cursor-pointer"
+            ></progress>
+            <span
+              id="storageUsedProgressLabel"
+              class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-bold text-white pointer-events-none"
+            ></span>
+          </div>
+        </div>
+
+        <div class="m-6 text-center">
+          <p>Internet speed:</p>
+          <span id="internetSpeed" class="font-bold">0</span>
+          <span id="internetUnit" class="font-bold">b/s</span>
+        </div>
+
+        <div class="m-6 px-6 text-center w-full">
+          <p>Processor load:</p>
+          <span id="cpuLoad" class="font-bold">0</span>
+          <span class="font-bold">%</span>
+          <progress
+            id="cpuLoadProgressBar"
+            value="0"
+            max="100"
+            class="w-full h-12 mt-6 cursor-pointer"
+          ></progress>
+        </div>
+
+        <div class="m-6 text-center">
+          <p>Time to find file:</p>
+          <span id="findFileTime" class="font-bold">0</span>
+        </div>
+      </aside>
+
+      <!-- upgrades -->
+      <aside
+        class="flex flex-col border-b md:border-b-0 md:border-r items-center"
+      >
+        <div class="m-6 text-center">
+          <button id="fileSizeUpgrade" class="border p-2">
+            <span id="fileSizeUpgradeValueIncrease"></span>
+          </button>
+          <br />
+          <span>Price:</span>
+          <span class="font-bold" id="fileSizeUpgradePrice"> </span>
+        </div>
+
+        <div class="m-6 text-center">
+          <button id="storageMaxUpgrade" class="border p-2">
+            <span id="storageMaxUpgradeValueIncrease"></span>
+          </button>
+          <br />
+          <span>Price:</span>
+          <span class="font-bold" id="storageMaxUpgradePrice"> </span>
+        </div>
+
+        <div class="m-6 text-center">
+          <button id="internetSpeedUpgrade" class="border p-2">
+            <span id="internetSpeedUpgradeValueIncrease"></span>
+          </button>
+          <br />
+          <span>Price:</span>
+          <span class="font-bold" id="internetSpeedUpgradePrice"> </span>
+        </div>
+
+        <div class="m-6 text-center">
+          <button id="cpuLoadUpgrade" class="border p-2">
+            <span id="cpuLoadUpgradeValueIncrease"></span>
+          </button>
+          <br />
+          <span>Price:</span>
+          <span class="font-bold" id="cpuLoadUpgradePrice"> </span>
+        </div>
+
+        <div class="m-6 text-center">
+          <button id="findFileTimeUpgrade" class="border p-2">
+            <span id="findFileTimeUpgradeValueIncrease"></span>
+          </button>
+          <br />
+          <span>Price:</span>
+          <span class="font-bold" id="findFileTimeUpgradePrice"> </span>
+        </div>
+
+        <div class="m-6 text-center">
+          <button id="maxFoundFilesUpgrade" class="border p-2">
+            <span id="maxFoundFilesUpgradeValueIncrease"></span>
+          </button>
+          <br />
+          <span>Price:</span>
+          <span class="font-bold" id="maxFoundFilesUpgradePrice"> </span>
+        </div>
+      </aside>
+
+      <aside class="flex flex-col items-center">
+        <div class="m-6 text-center w-full">
+          <p>Advanced Upgrades</p>
+          <span>Epstein files to next unlock:</span>
+          <span class="font-bold" id="archivedFilesToNextUnlock"></span>
+          <div
+            id="advancedUpgradesList"
+            class="flex flex-col items-center w-full mt-4"
+          ></div>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="m-10 items-center justify-items-center">
+      <p></p>
+    </footer>
+
+    <script src="advancedUpgrades.js"></script>
+    <script src="engine.js"></script>
+  </body>
+</html>
